@@ -11,6 +11,7 @@
         :key="place.contentid || `${place.title}-${place.addr1}`"
         :place="place"
         @select-place="emit('select-place', place)"
+        @add-to-cart="emit('add-to-cart', place)"
       />
     </div>
 
@@ -31,7 +32,7 @@ const props = defineProps({
   },
   description: {
     type: String,
-    default: '선택한 카테고리 기준으로 무작위로 6곳을 보여줍니다.'
+    default: '선택한 카테고리 기준 추천 장소입니다.'
   },
   places: {
     type: Array,
@@ -39,7 +40,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['select-place'])
+const emit = defineEmits(['select-place', 'add-to-cart'])
 
 const displayedPlaces = computed(() => {
   return [...props.places].slice(0, 6)

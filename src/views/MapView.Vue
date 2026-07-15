@@ -44,6 +44,7 @@
       :description="listDescription"
       :places="displayedPlaces"
       @select-place="handleSelectPlace"
+      @add-to-cart="handleAddToCart"
     />
   </div>
 </template>
@@ -217,6 +218,21 @@ const selectCategory = (category) => {
   renderPlaces()
 }
 
+const flyToFirstValidPlace = (places, zoom = 13) => {
+  if (!map.value || !places || !places.length) return
+  const first = places.find((p) => {
+    const lat = parseFloat(p.mapy)
+    const lng = parseFloat(p.mapx)
+    return !Number.isNaN(lat) && !Number.isNaN(lng)
+  })
+  if (!first) return
+  const lat = parseFloat(first.mapy)
+  const lng = parseFloat(first.mapx)
+  if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+    map.value.flyTo([lat, lng], zoom, { duration: 0.8 })
+  }
+}
+
 const handleSelectCourse = (course) => {
   selectedCourse.value = course
   selectedPlace.value = null
@@ -250,6 +266,11 @@ const toggleCart = () => {
     selectedCourse.value = null
     selectedPlace.value = null
     renderPlaces()
+    // 보관함을 연 경우 지도도 보관함 장소들 중 첫 장소로 이동
+    const cartPlaces = getPlacesForCart()
+    if (cartPlaces.length > 0) {
+      flyToFirstValidPlace(cartPlaces, 13)
+    }
   } else {
     viewMode.value = 'category'
     selectedCourse.value = null
@@ -316,9 +337,14 @@ const clearCart = () => {
   renderPlaces()
 }
 
+// 기존 watch는 유지하되, 보관함이 열려 있으면 좌표 이동도 수행하도록 확장
 watch(cartItems, () => {
   if (viewMode.value === 'cart' && isCartOpen.value) {
     renderPlaces()
+    const cartPlaces = getPlacesForCart()
+    if (cartPlaces.length > 0) {
+      flyToFirstValidPlace(cartPlaces, 13)
+    }
   }
 })
 
@@ -397,15 +423,5 @@ onBeforeUnmount(() => {
   border-radius: 12px;
   overflow: hidden;
   background: #f1f5f9;
-}
-
-.map-view__side {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.map-view__card {
-  min-width: 0;
 }
 </style>

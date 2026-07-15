@@ -5,7 +5,7 @@
         {{ isOpen ? '보관함 닫기' : '보관함 열기' }}
       </button>
       <button v-if="items.length" class="cart__clear" @click="emit('clear-cart')">
-        전체 초기화
+        보관함 초기화
       </button>
     </div>
 
@@ -27,7 +27,7 @@
         </div>
       </div>
 
-      <p v-else class="cart__empty">아직 보관한 장소가 없습니다.</p>
+      <p v-else class="cart__empty">보관함이 비어 있습니다.</p>
     </div>
   </div>
 </template>

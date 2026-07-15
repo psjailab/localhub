@@ -12,7 +12,7 @@
           @keydown.space.prevent="togglePopup"
         >
           <h3>서울 여행 코스</h3>
-          <p>테마별로 정리된 서울 여행 코스를 확인해보세요.</p>
+          <p>클릭하여 추천 여행 코스를 확인해보세요.</p>
         </div>
       </div>
     </div>
@@ -21,9 +21,9 @@
       <div class="course-select__popup-card">
         <div class="course-select__popup-header">
           <div>
-            <h4>{{ viewMode === 'themes' ? '코스 분류 선택' : '코스 목록' }}</h4>
+            <h4>{{ viewMode === 'themes' ? '코스 테마 선택' : '코스 목록' }}</h4>
             <p>
-              {{ viewMode === 'themes' ? '5개의 분류 중 하나를 선택하세요.' : '코스를 선택하면 지도와 목록이 바뀝니다.' }}
+              {{ viewMode === 'themes' ? '코스를 선택하세요.' : '코스를 선택하면 지도에 표시됩니다.' }}
             </p>
           </div>
           <div class="course-select__popup-actions">
