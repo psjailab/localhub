@@ -55,7 +55,7 @@ import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import PlaceCard from '../components/PlaceCard.vue'
-import PlaceListView from './PlaceListView.vue'
+import PlaceListView from '../components/PlaceListView.vue'
 import Cart from '../components/Cart.vue'
 import CourseSelect from '../components/CourseSelect.vue'
 
