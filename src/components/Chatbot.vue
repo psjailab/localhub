@@ -47,35 +47,17 @@ const OPENAI_KEY = import.meta.env.VITE_OPENAI_KEY
 
 const visible = ref(false)
 const input = ref('')
+
+// [수정] 화면 UI에 표시되는 대화 기록
+// 사용자에게 보이는 첫인사는 챗봇 역할(assistant)로 지정해 둡니다.
 const messages = ref([
   {
-    role: 'system',
+    role: 'assistant', 
     content: 'Localhub 챗봇 서비스에 오신 걸 환영합니다. 무엇이 궁금하신가요?'
   }
 ])
 const loading = ref(false)
 const error = ref(null)
-
-function extractAssistantTextFromResponse(data) {
-  // 다양한 포맷에 대응하는 폴백 파서
-  const fromChoicesMessage = data?.choices?.[0]?.message?.content
-  if (fromChoicesMessage) return fromChoicesMessage
-
-  const fromChoicesText = data?.choices?.[0]?.text
-  if (fromChoicesText) return fromChoicesText
-
-  if (typeof data?.output_text === 'string' && data.output_text.trim()) return data.output_text
-
-  const fromOutput = data?.output?.flatMap(item => {
-    if (Array.isArray(item.content)) {
-      return item.content.map(c => c?.text).filter(Boolean)
-    }
-    return item?.text ? [item.text] : []
-  }).filter(Boolean)
-  if (fromOutput && fromOutput.length) return fromOutput.join('\n')
-
-  return null
-}
 
 async function send() {
   if (!input.value) return
@@ -85,13 +67,28 @@ async function send() {
   }
 
   error.value = null
+  
+  // 1. 사용자의 메시지를 화면 UI에 추가
   messages.value.push({ role: 'user', content: input.value })
   const userPrompt = input.value
   input.value = ''
   loading.value = true
 
   try {
-    // 1) 먼저 chat/completions 시도 (gpt-5-mini에 맞춰)
+    // 2. OpenAI API에 보낼 대화 데이터 정제
+    // API 서버에는 system 지침을 맨 앞에 명확하게 정의하고, 그 뒤로 주고받은 대화만 전달합니다.
+    const apiMessages = [
+      {
+        role: 'system',
+        content: '당신은 LocalHub의 친절한 AI 가이드 챗봇입니다. 사용자의 질문에 로컬 전문가의 관점에서 친절하고 명확하게 답변해 주세요.'
+      },
+      ...messages.value.map(m => ({
+        role: m.role,
+        content: m.content
+      }))
+    ]
+
+    // 3. chat/completions 호출
     const resp = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -99,9 +96,10 @@ async function send() {
         Authorization: `Bearer ${OPENAI_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini',
-        messages: messages.value.map(m => ({ role: m.role, content: m.content })),
-        max_completion_tokens: 512
+        model: 'gpt-5-mini', // 또는 'gpt-3.5-turbo' 등 범용적인 모델 사용 권장
+        messages: apiMessages,
+        max_completion_tokens: 1536,     // max_completion_tokens 대신 표준 max_tokens 사용
+        temperature: 1
       })
     })
 
@@ -111,47 +109,19 @@ async function send() {
     }
 
     const data = await resp.json()
-    console.log('OpenAI response (chat/completions):', data)
+    console.log('OpenAI response:', data)
 
-    let assistant = extractAssistantTextFromResponse(data)
+    // 4. 안전한 파싱
+    const assistant = data?.choices?.[0]?.message?.content || null
 
-    // 2) 만약 chat/completions 응답에서 텍스트를 못 뽑았으면 responses 엔드포인트로 폴백 시도
-    if (!assistant) {
-      try {
-        const resp2 = await fetch('https://api.openai.com/v1/responses', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${OPENAI_KEY}`
-          },
-          body: JSON.stringify({
-            model: 'gpt-5-mini',
-            input: messages.value.map(m => ({ role: m.role, content: m.content })),
-            max_output_tokens: 512
-          })
-        })
-
-        if (resp2.ok) {
-          const data2 = await resp2.json()
-          console.log('OpenAI response (responses fallback):', data2)
-          assistant = extractAssistantTextFromResponse(data2)
-        } else {
-          const errText2 = await resp2.text()
-          console.warn('[responses fallback] non-ok:', resp2.status, errText2)
-        }
-      } catch (e) {
-        console.warn('responses fallback failed:', e)
-      }
-    }
-
-    if (assistant) {
-      messages.value.push({ role: 'assistant', content: assistant })
+    if (assistant && assistant.trim()) {
+      messages.value.push({ role: 'assistant', content: assistant.trim() })
     } else {
       messages.value.push({
         role: 'assistant',
-        content: '🤖 응답을 받았으나 텍스트를 추출하지 못했습니다. 개발자 콘솔의 응답을 확인하세요.'
+        content: '🤖 API 응답은 받았으나, 내용(Content)이 비어 있습니다. 질문을 다시 한번 입력해 주세요.'
       })
-      console.warn('응답 구조에서 텍스트를 찾을 수 없습니다.')
+      console.warn('API 응답 구조 분석 실패:', data)
     }
   } catch (err) {
     error.value = `통신 실패: ${err.message || String(err)}`
@@ -162,7 +132,7 @@ async function send() {
 }
 
 function clear() {
-  messages.value = [{ role: 'system', content: 'Localhub 챗봇 서비스에 오신 걸 환영합니다. 무엇이 궁금하신가요?' }]
+  messages.value = [{ role: 'assistant', content: 'Localhub 챗봇 서비스에 오신 걸 환영합니다. 무엇이 궁금하신가요?' }]
   input.value = ''
   error.value = null
 }
