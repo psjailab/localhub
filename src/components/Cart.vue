@@ -18,9 +18,8 @@
           class="cart__item"
           @click="emit('select-place', item)"
         >
-          <div>
+          <div class="cart__item-info">
             <strong>{{ item.title }}</strong>
-            <p>{{ item.addr1 || '주소 정보 없음' }}</p>
           </div>
           <button class="cart__remove" @click.stop="emit('remove-from-cart', item)">
             삭제
@@ -122,7 +121,7 @@ const emit = defineEmits(['toggle-cart', 'remove-from-cart', 'clear-cart', 'sele
 .cart__item {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.5rem;
   padding: 0.7rem;
   border: 1px solid #e2e8f0;
@@ -136,10 +135,8 @@ const emit = defineEmits(['toggle-cart', 'remove-from-cart', 'clear-cart', 'sele
   background: #eef2ff;
 }
 
-.cart__item p {
-  margin: 0.25rem 0 0;
-  font-size: 0.9rem;
-  color: #64748b;
+.cart__item-info {
+  flex: 1;
 }
 
 .cart__empty {
