@@ -6,9 +6,19 @@
       브라우저의 캐시/LocalStorage 초기화 시 게시글이 삭제됩니다. 중요한 데이터는 별도 백업하세요.
     </div>
 
+    <SearchBar @search="onSearch" />
+
     <BoardForm v-if="showForm" :initial="editing" :isEdit="isEdit" @save="handleSave" @cancel="handleCancel" />
 
-    <BoardList :posts="posts" @edit="promptPasswordForEdit" @delete="promptPasswordForDelete" @create="startCreate" @view="viewPost" />
+    <BoardList
+      :posts="filteredPosts"
+      @edit="promptPasswordForEdit"
+      @delete="promptPasswordForDelete"
+      @create="startCreate"
+      @view="viewPost"
+      @like="handleLike"
+      @viewInc="handleViewInc"
+    />
 
     <div v-if="selected" style="margin-top:16px; padding:12px; border:1px solid #ddd; background:#fff;">
       <h3>{{ selected.title }}</h3>
@@ -56,12 +66,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import SearchBar from '../components/SearchBar.vue';
 import BoardForm from '../components/BoardForm.vue';
 import BoardList from '../components/BoardList.vue';
-import { getPosts, createPost, updatePost, deletePost, getPostById, currentStorageSize } from '../utils/storage';
+import { getPosts, createPost, updatePost, deletePost, getPostById, incView, toggleLike, currentStorageSize } from '../utils/storage';
 
+// 상태
 const posts = ref([]);
+const query = ref('');        // 검색어
+const scope = ref('all');     // 검색 범위: all/title/content
+
 const editing = ref(null);
 const selected = ref(null);
 const showForm = ref(false);
@@ -72,32 +87,47 @@ const notice = ref('');
 // 삭제 확인 상태: show, targetId, title
 const confirmPending = ref({ show: false, targetId: null, title: '' });
 
+// 비밀번호 모달 상태
+const pwdPrompt = ref({ show: false, targetId: null, action: null, value: '', error: '' });
+
 function load() {
   posts.value = getPosts();
   storageSize.value = currentStorageSize();
 }
-
 onMounted(load);
 
+// 검색 처리
+function onSearch({ q, scope: s }) {
+  query.value = q || '';
+  scope.value = s || 'all';
+}
+const filteredPosts = computed(() => {
+  if (!query.value) return posts.value;
+  const q = query.value.toLowerCase();
+  return posts.value.filter(p => {
+    if (scope.value === 'title') return (p.title || '').toLowerCase().includes(q);
+    if (scope.value === 'content') return (p.content || '').toLowerCase().includes(q);
+    return ((p.title || '').toLowerCase().includes(q) || (p.content || '').toLowerCase().includes(q));
+  });
+});
+
+// 생성/수정 관련
 function startCreate() {
   editing.value = { title: '', content: '' };
   selected.value = null;
   isEdit.value = false;
   showForm.value = true;
 }
-
 function startEditWithPasswordCheck(post) {
   editing.value = { ...post };
   isEdit.value = true;
   showForm.value = true;
 }
-
 function handleCancel() {
   editing.value = null;
   showForm.value = false;
   isEdit.value = false;
 }
-
 function handleSave(payload) {
   try {
     if (payload.id) {
@@ -112,7 +142,7 @@ function handleSave(payload) {
     editing.value = null;
     isEdit.value = false;
   } catch (err) {
-    if (err.message === 'STORAGE_LIMIT_EXCEEDED') {
+    if (err?.message === 'STORAGE_LIMIT_EXCEEDED') {
       noticeTransient('저장할 수 없습니다: LocalStorage 용량(약 5MB)을 초과합니다.');
     } else {
       noticeTransient('저장 중 오류가 발생했습니다.');
@@ -120,19 +150,25 @@ function handleSave(payload) {
   }
 }
 
-/* 비밀번호 모달 로직 */
-const pwdPrompt = ref({ show: false, targetId: null, action: null, value: '', error: '' });
+// 조회수 증가 핸들러
+function handleViewInc(post) {
+  const updated = incView(post.id);
+  if (updated) load();
+}
 
+// 좋아요 핸들러
+function handleLike(post) {
+  const updated = toggleLike(post.id);
+  if (updated) load();
+}
+
+/* 비밀번호 모달 로직 */
 function promptPasswordForEdit(post) {
-  // 직접 편집으로 이동하는 경우
   pwdPrompt.value = { show: true, targetId: post.id, action: 'edit', value: '', error: '' };
 }
-
 function promptPasswordForDelete(post) {
-  // 삭제 요청: 비밀번호 확인 먼저
   pwdPrompt.value = { show: true, targetId: post.id, action: 'delete', value: '', error: '' };
 }
-
 function closePwdPrompt() {
   pwdPrompt.value = { show: false, targetId: null, action: null, value: '', error: '' };
 }
@@ -151,59 +187,45 @@ function onPwdConfirm() {
     return;
   }
 
-  // 버그 원인: 모달을 닫은 뒤에 pwdPrompt.value.action을 참조하면 null이 됩니다.
-  // 따라서 action을 먼저 캡처한 뒤 모달을 닫습니다.
+  // action 캡처 후 모달 닫음 (이전 버그 방지)
   const action = pwdPrompt.value.action;
   closePwdPrompt();
 
   if (action === 'edit') {
-    // 편집 요청이면 편집 모드로 직접 전환
     startEditWithPasswordCheck(target);
     return;
   }
 
   if (action === 'delete') {
-    // 삭제 요청이면 confirmPending에 대상 정보 설정하고 화면에 표시
     confirmPending.value = { show: true, targetId: id, title: target.title || '(제목 없음)' };
-    // 폼 숨김으로 포커스/입력 차단 문제 방지
     showForm.value = false;
     editing.value = null;
     isEdit.value = false;
   }
 }
 
-/* 삭제 확인에서 '예' 클릭 */
+/* 삭제 확인 처리 */
 function confirmDeleteYes() {
   const id = confirmPending.value.targetId;
   if (!id) return;
-
   try {
-    // 직접 호출: deletePost는 utils에서 LocalStorage에 반영합니다.
     deletePost(id);
-
     if (selected.value && selected.value.id === id) selected.value = null;
     load();
-
-    // 상태 초기화
     confirmPending.value = { show: false, targetId: null, title: '' };
     showForm.value = false;
     editing.value = null;
     isEdit.value = false;
-
     noticeTransient('삭제되었습니다.');
   } catch (err) {
     noticeTransient('삭제 중 오류가 발생했습니다.');
-    // 안전 초기화
     confirmPending.value = { show: false, targetId: null, title: '' };
     showForm.value = false;
     editing.value = null;
     isEdit.value = false;
   }
 }
-
-/* 삭제 확인에서 '아니오' 클릭 */
 function confirmDeleteNo() {
-  // 단순히 확인 영역 닫고 상태 초기화
   confirmPending.value = { show: false, targetId: null, title: '' };
   closePwdPrompt();
   showForm.value = false;
@@ -217,12 +239,10 @@ function viewPost(post) {
   selected.value = post;
 }
 
-/* 임시 알림 (3초 후 사라짐) */
+/* 알림 */
 function noticeTransient(text, ms = 3000) {
   notice.value = text;
-  setTimeout(() => {
-    notice.value = '';
-  }, ms);
+  setTimeout(() => { notice.value = ''; }, ms);
 }
 
 /* 유틸 */

@@ -72,3 +72,28 @@ export function deletePost(id) {
 export function getPostById(id) {
   return getPosts().find(p => p.id === id) || null;
 }
+
+// --- 조회수 증가: id에 해당하면 views++ 해서 저장하고 업데이트된 post 반환
+export function incView(id) {
+  const posts = getPosts();
+  const idx = posts.findIndex(p => p.id === id);
+  if (idx === -1) return null;
+  posts[idx].views = (posts[idx].views || 0) + 1;
+  savePosts(posts);
+  return posts[idx];
+}
+
+// --- 좋아요 토글: id에 해당 post의 liked(boolean) 토글, likes 카운트 유지
+export function toggleLike(id) {
+  const posts = getPosts();
+  const idx = posts.findIndex(p => p.id === id);
+  if (idx === -1) return null;
+  const post = posts[idx];
+  const currentlyLiked = !!post.liked;
+  post.liked = !currentlyLiked;
+  post.likes = (post.likes || 0) + (post.liked ? 1 : -1);
+  if (post.likes < 0) post.likes = 0;
+  posts[idx] = post;
+  savePosts(posts);
+  return post;
+}
