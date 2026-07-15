@@ -13,8 +13,10 @@
     </div>
 
     <div class="place-card__body">
-      <h3>{{ place.title }}</h3>
-      <p>{{ place.addr1 || '주소 정보 없음' }}</p>
+      <div class="place-card__info">
+        <h3>{{ place.title }}</h3>
+        <p>{{ place.addr1 || '주소 정보 없음' }}</p>
+      </div>
 
       <div class="place-card__actions">
         <button class="place-card__btn" @click.stop="emit('add-to-cart', place)">
@@ -85,7 +87,14 @@ const handleSelectPlace = () => {
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.75rem;
+  min-height: 170px;
+}
+
+.place-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
 .place-card__body h3 {
@@ -104,6 +113,7 @@ const handleSelectPlace = () => {
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
+  margin-top: auto;
 }
 
 .place-card__btn,
