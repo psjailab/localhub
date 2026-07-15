@@ -59,10 +59,8 @@ const shuffleArray = (arr) => {
 const displayedPlaces = computed(() => {
   const src = props.places || []
   if (props.allowNoImage) {
-    // 보관함 또는 코스일 때: 이미지 유무 상관없이 전달된 순서대로 최대 6개
-    return src.slice(0, 6)
+    return src
   }
-  // 카테고리용: 이미지 있는 항목만 무작위로 섞어 6개
   const withImage = src.filter((p) => p && p.firstimage)
   return shuffleArray(withImage).slice(0, 6)
 })

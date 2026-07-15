@@ -86,6 +86,7 @@ const categoryDataMap = {
 const mapContainer = ref(null)
 const map = ref(null)
 let markerLayer = null
+const visiblePlaces = ref([])
 
 const normalizeText = (value) =>
   String(value || '')
@@ -157,6 +158,28 @@ const getPlacesForCart = () => {
   })
 }
 
+const getVisiblePlaces = (places) => {
+  if (!map.value || !map.value.getBounds) return places
+  const bounds = map.value.getBounds()
+  return (places || []).filter((place) => {
+    const lat = parseFloat(place.mapy)
+    const lng = parseFloat(place.mapx)
+    return !Number.isNaN(lat) && !Number.isNaN(lng) && bounds.contains([lat, lng])
+  })
+}
+
+const updateVisiblePlaces = () => {
+  if (viewMode.value === 'category') {
+    visiblePlaces.value = getVisiblePlaces(getPlacesByCategory(selectedCategory.value))
+  } else if (viewMode.value === 'course' && selectedCourse.value) {
+    visiblePlaces.value = getPlacesForCourse(selectedCourse.value)
+  } else if (viewMode.value === 'cart' && isCartOpen.value) {
+    visiblePlaces.value = getPlacesForCart()
+  } else {
+    visiblePlaces.value = getPlacesByCategory(selectedCategory.value)
+  }
+}
+
 const displayedPlaces = computed(() => {
   if (viewMode.value === 'course' && selectedCourse.value) {
     return getPlacesForCourse(selectedCourse.value)
@@ -166,7 +189,7 @@ const displayedPlaces = computed(() => {
     return getPlacesForCart()
   }
 
-  return getPlacesByCategory(selectedCategory.value)
+  return visiblePlaces.value
 })
 
 const listTitle = computed(() => {
@@ -197,6 +220,8 @@ const renderPlaces = () => {
   } else {
     markerLayer.clearLayers()
   }
+
+  updateVisiblePlaces()
 
   const places = displayedPlaces.value
 
