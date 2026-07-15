@@ -12,7 +12,10 @@
           @keydown.space.prevent="togglePopup"
         >
           <h3>서울 여행 코스</h3>
-          <p>여기를 클릭하여 추천 여행 코스를 확인해보세요.</p>
+          <p>
+            <span class="course-select__highlight">여기를</span>
+            클릭하여 추천 여행 코스를 확인해보세요.
+          </p>
         </div>
       </div>
     </div>
@@ -244,6 +247,11 @@ const handleSelectCourse = (course) => {
   margin: 0;
   color: #64748b;
   font-size: 0.95rem;
+}
+
+.course-select__highlight {
+  color: #ef4444;
+  font-weight: 700;
 }
 
 .course-select__toggle,
