@@ -97,3 +97,90 @@ export function toggleLike(id) {
   savePosts(posts);
   return post;
 }
+
+// Comments helpers (append to end of src/utils/storage.js)
+
+// Return comments array for a post (empty array if none)
+export function getComments(postId) {
+  const post = getPostById(postId);
+  return post ? (post.comments || []) : [];
+}
+
+// Create a comment (parentId null => top-level; otherwise reply)
+export function createComment(postId, { parentId = null, content, password = '' }) {
+  const posts = getPosts();
+  const idx = posts.findIndex(p => p.id === postId);
+  if (idx === -1) return null;
+  const post = posts[idx];
+  post.comments = post.comments || [];
+  const comment = {
+    id: generateId(),
+    parentId,
+    content: content || '',
+    password: password || '',
+    createdAt: new Date().toISOString(),
+    updatedAt: null,
+    likes: 0
+  };
+  post.comments.push(comment);
+  savePosts(posts);
+  return comment;
+}
+
+// Update a comment by id (patch may contain { content })
+export function updateComment(postId, commentId, patch) {
+  const posts = getPosts();
+  const pIdx = posts.findIndex(p => p.id === postId);
+  if (pIdx === -1) return null;
+  const post = posts[pIdx];
+  post.comments = post.comments || [];
+  const cIdx = post.comments.findIndex(c => c.id === commentId);
+  if (cIdx === -1) return null;
+  post.comments[cIdx] = { ...post.comments[cIdx], ...patch, updatedAt: new Date().toISOString() };
+  posts[pIdx] = post;
+  savePosts(posts);
+  return post.comments[cIdx];
+}
+
+// Delete a comment and its direct replies (remove comment and any where parentId == commentId)
+export function deleteComment(postId, commentId) {
+  const posts = getPosts();
+  const pIdx = posts.findIndex(p => p.id === postId);
+  if (pIdx === -1) return null;
+  const post = posts[pIdx];
+  post.comments = (post.comments || []).filter(c => c.id !== commentId && c.parentId !== commentId);
+  posts[pIdx] = post;
+  savePosts(posts);
+  return post.comments;
+}
+
+// Toggle like on a comment
+export function toggleCommentLike(postId, commentId) {
+  const posts = getPosts();
+  const pIdx = posts.findIndex(p => p.id === postId);
+  if (pIdx === -1) return null;
+  const post = posts[pIdx];
+  post.comments = post.comments || [];
+  const cIdx = post.comments.findIndex(c => c.id === commentId);
+  if (cIdx === -1) return null;
+  const comment = post.comments[cIdx];
+  comment.liked = !comment.liked;
+  comment.likes = (comment.likes || 0) + (comment.liked ? 1 : -1);
+  if (comment.likes < 0) comment.likes = 0;
+  post.comments[cIdx] = comment;
+  posts[pIdx] = post;
+  savePosts(posts);
+  return comment;
+}
+
+function onCommentRequestDelete(comment) {
+  // set pwdPrompt to request comment deletion; include postId in meta using selected.value
+  pwdPrompt.value = {
+    show: true,
+    targetId: comment.id,
+    action: 'delete_comment',
+    value: '',
+    error: '',
+    meta: { postId: selected.value?.id } // use selected.value (ref) to get actual id
+  };
+}
