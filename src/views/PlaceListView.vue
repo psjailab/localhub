@@ -42,14 +42,7 @@ const props = defineProps({
 const emit = defineEmits(['select-place'])
 
 const displayedPlaces = computed(() => {
-  const items = [...props.places]
-
-  for (let i = items.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[items[i], items[j]] = [items[j], items[i]]
-  }
-
-  return items.slice(0, 6)
+  return [...props.places].slice(0, 6)
 })
 </script>
 

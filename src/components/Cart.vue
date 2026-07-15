@@ -1,30 +1,34 @@
 <template>
   <div class="cart">
     <div class="cart__header">
-      <h3>보관함</h3>
+      <button class="cart__toggle" @click="emit('toggle-cart')">
+        {{ isOpen ? '보관함 닫기' : '보관함 열기' }}
+      </button>
       <button v-if="items.length" class="cart__clear" @click="emit('clear-cart')">
         전체 초기화
       </button>
     </div>
 
-    <div v-if="items.length" class="cart__list">
-      <div
-        v-for="item in items"
-        :key="item.contentid"
-        class="cart__item"
-        @click="emit('select-place', item)"
-      >
-        <div>
-          <strong>{{ item.title }}</strong>
-          <p>{{ item.addr1 || '주소 정보 없음' }}</p>
+    <div v-if="isOpen" class="cart__panel">
+      <div v-if="items.length" class="cart__list">
+        <div
+          v-for="item in items"
+          :key="item.contentid"
+          class="cart__item"
+          @click="emit('select-place', item)"
+        >
+          <div>
+            <strong>{{ item.title }}</strong>
+            <p>{{ item.addr1 || '주소 정보 없음' }}</p>
+          </div>
+          <button class="cart__remove" @click.stop="emit('remove-from-cart', item)">
+            삭제
+          </button>
         </div>
-        <button class="cart__remove" @click.stop="emit('remove-from-cart', item)">
-          삭제
-        </button>
       </div>
-    </div>
 
-    <p v-else class="cart__empty">아직 보관한 장소가 없습니다.</p>
+      <p v-else class="cart__empty">아직 보관한 장소가 없습니다.</p>
+    </div>
   </div>
 </template>
 
@@ -33,10 +37,14 @@ const props = defineProps({
   items: {
     type: Array,
     default: () => []
+  },
+  isOpen: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['remove-from-cart', 'clear-cart', 'select-place'])
+const emit = defineEmits(['toggle-cart', 'remove-from-cart', 'clear-cart', 'select-place'])
 </script>
 
 <style scoped>
@@ -52,15 +60,22 @@ const emit = defineEmits(['remove-from-cart', 'clear-cart', 'select-place'])
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
   margin-bottom: 0.75rem;
 }
 
+.cart__toggle,
 .cart__clear,
 .cart__remove {
   border: none;
   border-radius: 999px;
   padding: 0.4rem 0.7rem;
   cursor: pointer;
+}
+
+.cart__toggle {
+  background: #2563eb;
+  color: white;
 }
 
 .cart__clear {
@@ -71,6 +86,12 @@ const emit = defineEmits(['remove-from-cart', 'clear-cart', 'select-place'])
 .cart__remove {
   background: #f1f5f9;
   color: #334155;
+}
+
+.cart__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
 .cart__list {

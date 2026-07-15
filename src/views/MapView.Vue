@@ -2,7 +2,7 @@
   <div class="map-view">
     <h2>지도 화면</h2>
 
-    <CourseSelect @select-course="handleSelectCourse" />
+    <CourseSelect @select-course="handleSelectCourse" @reset-course-selection="handleResetCourseSelection" />
 
     <div class="map-view__filters">
       <button
@@ -30,6 +30,8 @@
 
         <Cart
           :items="cartItems"
+          :is-open="isCartOpen"
+          @toggle-cart="toggleCart"
           @remove-from-cart="removeFromCart"
           @clear-cart="clearCart"
           @select-place="handleSelectPlace"
@@ -68,6 +70,7 @@ const selectedPlace = ref(null)
 const selectedCourse = ref(null)
 const cartItems = ref([])
 const viewMode = ref('category')
+const isCartOpen = ref(false)
 
 const categoryDataMap = {
   관광지: SeoulTourData,
@@ -157,7 +160,7 @@ const displayedPlaces = computed(() => {
     return getPlacesForCourse(selectedCourse.value)
   }
 
-  if (viewMode.value === 'cart') {
+  if (viewMode.value === 'cart' && isCartOpen.value) {
     return getPlacesForCart()
   }
 
@@ -168,7 +171,7 @@ const listTitle = computed(() => {
   if (viewMode.value === 'course' && selectedCourse.value) {
     return selectedCourse.value.title
   }
-  if (viewMode.value === 'cart') {
+  if (viewMode.value === 'cart' && isCartOpen.value) {
     return '보관함 장소'
   }
   return `${selectedCategory.value} 추천 장소`
@@ -178,7 +181,7 @@ const listDescription = computed(() => {
   if (viewMode.value === 'course' && selectedCourse.value) {
     return '선택한 코스와 관련된 장소들을 보여줍니다.'
   }
-  if (viewMode.value === 'cart') {
+  if (viewMode.value === 'cart' && isCartOpen.value) {
     return '보관함에 담긴 장소만 지도와 목록에 표시됩니다.'
   }
   return '선택한 카테고리 기준으로 무작위로 6곳을 보여줍니다.'
@@ -196,7 +199,6 @@ const renderPlaces = () => {
   places.forEach((place) => {
     const lat = parseFloat(place.mapy)
     const lng = parseFloat(place.mapx)
-
     const marker = L.marker([lat, lng])
 
     marker.on('click', () => {
@@ -234,6 +236,28 @@ const handleSelectCourse = (course) => {
   }
 }
 
+const handleResetCourseSelection = () => {
+  selectedCourse.value = null
+  selectedPlace.value = null
+  viewMode.value = 'category'
+  renderPlaces()
+}
+
+const toggleCart = () => {
+  isCartOpen.value = !isCartOpen.value
+  if (isCartOpen.value) {
+    viewMode.value = 'cart'
+    selectedCourse.value = null
+    selectedPlace.value = null
+    renderPlaces()
+  } else {
+    viewMode.value = 'category'
+    selectedCourse.value = null
+    selectedPlace.value = null
+    renderPlaces()
+  }
+}
+
 const handleSelectPlace = (place) => {
   if (!place) return
 
@@ -255,17 +279,23 @@ const handleAddToCart = (place) => {
     cartItems.value.push(place)
   }
 
-  viewMode.value = 'cart'
-  selectedCourse.value = null
-  selectedPlace.value = null
-  renderPlaces()
+  if (!isCartOpen.value) {
+    viewMode.value = 'category'
+    selectedCourse.value = null
+    selectedPlace.value = null
+    renderPlaces()
+  }
 }
 
 const removeFromCart = (place) => {
   cartItems.value = cartItems.value.filter((item) => item.contentid !== place.contentid)
 
   if (cartItems.value.length === 0) {
-    viewMode.value = 'category'
+    if (isCartOpen.value) {
+      viewMode.value = 'cart'
+    } else {
+      viewMode.value = 'category'
+    }
     selectedCourse.value = null
     selectedPlace.value = null
     renderPlaces()
@@ -276,14 +306,18 @@ const removeFromCart = (place) => {
 
 const clearCart = () => {
   cartItems.value = []
-  viewMode.value = 'category'
+  if (isCartOpen.value) {
+    viewMode.value = 'cart'
+  } else {
+    viewMode.value = 'category'
+  }
   selectedCourse.value = null
   selectedPlace.value = null
   renderPlaces()
 }
 
 watch(cartItems, () => {
-  if (viewMode.value === 'cart') {
+  if (viewMode.value === 'cart' && isCartOpen.value) {
     renderPlaces()
   }
 })

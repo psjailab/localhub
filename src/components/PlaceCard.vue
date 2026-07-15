@@ -1,18 +1,13 @@
 <template>
-  <div v-if="place" class="place-card">
+  <div v-if="place" class="place-card" @click="handleSelectPlace">
     <div class="place-card__image-wrap">
       <img
         v-if="place.firstimage"
         :src="place.firstimage"
         :alt="place.title"
         class="place-card__image"
-        @click.stop.prevent="handleSelectPlace"
       />
-      <div
-        v-else
-        class="place-card__image place-card__image--empty"
-        @click.stop.prevent="handleSelectPlace"
-      >
+      <div v-else class="place-card__image place-card__image--empty">
         이미지 없음
       </div>
     </div>
@@ -22,11 +17,11 @@
       <p>{{ place.addr1 || '주소 정보 없음' }}</p>
 
       <div class="place-card__actions">
-        <button class="place-card__btn" @click="emit('add-to-cart', place)">
+        <button class="place-card__btn" @click.stop="emit('add-to-cart', place)">
           + 보관
         </button>
 
-        <button class="place-card__like" @click="toggleLike">
+        <button class="place-card__like" @click.stop="toggleLike">
           ♥ {{ likeCount }}
         </button>
       </div>
@@ -65,6 +60,7 @@ const handleSelectPlace = () => {
   overflow: hidden;
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
 }
 
 .place-card__image-wrap {
@@ -76,7 +72,6 @@ const handleSelectPlace = () => {
   height: 180px;
   object-fit: cover;
   display: block;
-  cursor: pointer;
 }
 
 .place-card__image--empty {

@@ -1,51 +1,65 @@
 <template>
   <section class="course-select">
     <div class="course-select__header">
-      <h3>서울 여행 코스</h3>
-      <p>테마별로 정리된 서울 여행 코스를 확인해보세요.</p>
+      <div class="course-select__title-row">
+        <div
+          class="course-select__title-clickable"
+          role="button"
+          :aria-expanded="isOpen"
+          tabindex="0"
+          @click="togglePopup"
+          @keydown.enter.prevent="togglePopup"
+          @keydown.space.prevent="togglePopup"
+        >
+          <h3>서울 여행 코스</h3>
+          <p>테마별로 정리된 서울 여행 코스를 확인해보세요.</p>
+        </div>
+      </div>
     </div>
 
-    <div class="course-select__filters">
-      <button
-        v-for="theme in themes"
-        :key="theme.value"
-        class="course-select__filter-btn"
-        :class="{ active: selectedTheme === theme.value }"
-        @click="selectedTheme = theme.value"
-      >
-        {{ theme.label }}
-      </button>
-    </div>
-
-    <div class="course-select__summary">
-      {{ filteredCourses.length }}개의 코스
-    </div>
-
-    <div v-if="filteredCourses.length" class="course-select__grid">
-      <article
-        v-for="course in filteredCourses"
-        :key="course.contentid"
-        class="course-select__card"
-        @click="emit('select-course', course)"
-      >
-        <img
-          v-if="course.firstimage"
-          :src="course.firstimage"
-          :alt="course.title"
-          class="course-select__image"
-        />
-        <div v-else class="course-select__image course-select__image--empty">
-          이미지 없음
+    <div v-if="isOpen" class="course-select__popup">
+      <div class="course-select__popup-card">
+        <div class="course-select__popup-header">
+          <div>
+            <h4>{{ viewMode === 'themes' ? '코스 분류 선택' : '코스 목록' }}</h4>
+            <p>
+              {{ viewMode === 'themes' ? '5개의 분류 중 하나를 선택하세요.' : '코스를 선택하면 지도와 목록이 바뀝니다.' }}
+            </p>
+          </div>
+          <div class="course-select__popup-actions">
+            <button v-if="viewMode === 'courses'" class="course-select__ghost-btn" @click="backToThemes">
+              분류로 돌아가기
+            </button>
+            <button class="course-select__ghost-btn" @click="resetSelection">
+              닫기
+            </button>
+          </div>
         </div>
 
-        <div class="course-select__body">
-          <h4>{{ course.title }}</h4>
-          <p>{{ course.addr1 || '주소 정보 없음' }}</p>
+        <div v-if="viewMode === 'themes'" class="course-select__filters">
+          <button
+            v-for="theme in themes"
+            :key="theme.value"
+            class="course-select__filter-btn"
+            :class="{ active: selectedTheme === theme.value }"
+            @click="selectTheme(theme.value)"
+          >
+            {{ theme.label }}
+          </button>
         </div>
-      </article>
-    </div>
 
-    <p v-else class="course-select__empty">표시할 코스가 없습니다.</p>
+        <div v-else class="course-select__course-list">
+          <button
+            v-for="course in filteredCourses"
+            :key="course.contentid"
+            class="course-select__course-btn"
+            @click="handleSelectCourse(course)"
+          >
+            {{ course.title }}
+          </button>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -53,9 +67,12 @@
 import { computed, ref } from 'vue'
 import courseData from '../../day03/data/서울/서울_여행코스.json'
 
-const emit = defineEmits(['select-course'])
+const emit = defineEmits(['select-course', 'reset-course-selection'])
 
 const rawCourses = [...(courseData.items || [])]
+const isOpen = ref(false)
+const viewMode = ref('themes')
+const selectedTheme = ref('all')
 
 const normalizeText = (value) =>
   String(value || '')
@@ -141,7 +158,6 @@ const themeConfig = [
   }
 ]
 
-const selectedTheme = ref('all')
 const themes = themeConfig
 
 const filteredCourses = computed(() => {
@@ -165,13 +181,38 @@ const filteredCourses = computed(() => {
 
   return courses.sort((a, b) => a.title.localeCompare(b.title, 'ko'))
 })
+
+const selectTheme = (themeValue) => {
+  selectedTheme.value = themeValue
+  viewMode.value = 'courses'
+}
+
+const backToThemes = () => {
+  viewMode.value = 'themes'
+}
+
+const resetSelection = () => {
+  selectedTheme.value = 'all'
+  viewMode.value = 'themes'
+  isOpen.value = false
+  emit('reset-course-selection')
+}
+
+const togglePopup = () => {
+  isOpen.value = !isOpen.value
+}
+
+const handleSelectCourse = (course) => {
+  emit('select-course', course)
+  isOpen.value = false
+}
 </script>
 
 <style scoped>
 .course-select {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
   padding: 1rem 0;
 }
 
@@ -181,30 +222,106 @@ const filteredCourses = computed(() => {
   gap: 0.25rem;
 }
 
-.course-select__header h3 {
+.course-select__title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.course-select__title-clickable {
+  display: inline-block;
+  cursor: pointer;
+  outline: none;
+}
+
+.course-select__title-clickable h3 {
   margin: 0;
   font-size: 1.15rem;
 }
 
-.course-select__header p {
+.course-select__title-clickable p {
   margin: 0;
   color: #64748b;
   font-size: 0.95rem;
 }
 
-.course-select__filters {
+.course-select__toggle,
+.course-select__ghost-btn,
+.course-select__filter-btn,
+.course-select__course-btn {
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #334155;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.course-select__toggle {
+  padding: 0.55rem 0.9rem;
+  font-weight: 600;
+}
+
+.course-select__popup {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.course-select__popup-card {
+  width: min(720px, 100%);
+  max-height: 80vh;
+  overflow: auto;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.16);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.course-select__popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.course-select__popup-header h4 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.course-select__popup-header p {
+  margin: 0.25rem 0 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.course-select__popup-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
+.course-select__ghost-btn {
+  padding: 0.5rem 0.8rem;
+}
+
+.course-select__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
 .course-select__filter-btn {
-  border: 1px solid #cbd5e1;
-  background: white;
-  color: #334155;
-  padding: 0.55rem 0.8rem;
-  border-radius: 999px;
-  cursor: pointer;
+  padding: 0.6rem 0.9rem;
 }
 
 .course-select__filter-btn.active {
@@ -213,76 +330,21 @@ const filteredCourses = computed(() => {
   border-color: #2563eb;
 }
 
-.course-select__summary {
-  color: #475569;
-  font-size: 0.95rem;
+.course-select__course-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
-.course-select__grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.course-select__card {
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  overflow: hidden;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  cursor: pointer;
-}
-
-.course-select__image {
+.course-select__course-btn {
   width: 100%;
-  height: 160px;
-  object-fit: cover;
-  display: block;
+  padding: 0.8rem 1rem;
+  text-align: left;
   background: #f8fafc;
 }
 
-.course-select__image--empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #64748b;
-}
-
-.course-select__body {
-  padding: 0.9rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.course-select__body h4 {
-  margin: 0;
-  font-size: 1rem;
-}
-
-.course-select__body p {
-  margin: 0;
-  color: #64748b;
-  font-size: 0.9rem;
-}
-
-.course-select__empty {
-  margin: 0;
-  color: #64748b;
-  padding: 1rem;
-  border: 1px dashed #cbd5e1;
-  border-radius: 12px;
-}
-
-@media (max-width: 900px) {
-  .course-select__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 640px) {
-  .course-select__grid {
-    grid-template-columns: 1fr;
-  }
+.course-select__course-btn:hover {
+  background: #eef2ff;
+  border-color: #93c5fd;
 }
 </style>
