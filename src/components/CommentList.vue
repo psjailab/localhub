@@ -12,7 +12,6 @@
             <button @click="$emit('reply', c)">답글</button>
             <button @click="$emit('edit', c)" style="margin-left:6px;">수정</button>
             <button @click="$emit('delete', c)" style="margin-left:6px;">삭제</button>
-            <button @click="$emit('like', c)" style="margin-left:6px;">{{ c.liked ? '♥' : '♡' }} {{ c.likes || 0 }}</button>
           </div>
         </div>
 
@@ -27,7 +26,6 @@
               <div style="text-align:right;">
                 <button @click="$emit('edit', r)">수정</button>
                 <button @click="$emit('delete', r)" style="margin-left:6px;">삭제</button>
-                <button @click="$emit('like', r)" style="margin-left:6px;">{{ r.liked ? '♥' : '♡' }} {{ r.likes || 0 }}</button>
               </div>
             </div>
           </div>
