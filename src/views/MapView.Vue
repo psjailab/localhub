@@ -185,7 +185,7 @@ const listDescription = computed(() => {
   if (viewMode.value === 'cart' && isCartOpen.value) {
     return '보관함에 담긴 장소만 지도와 목록에 표시됩니다.'
   }
-  return '선택한 카테고리 기준으로 무작위로 6곳을 보여줍니다.'
+  return '선택한 카테고리 기준으로 추천 장소를 보여줍니다.'
 })
 
 const renderPlaces = () => {
