@@ -2,7 +2,7 @@
   <div class="map-view">
     <h2>지도 화면</h2>
 
-    <CourseSelect @select-course="handleSelectCourse" @reset-course-selection="handleResetCourseSelection" />>
+    <CourseSelect @select-course="handleSelectCourse" @reset-course-selection="handleResetCourseSelection" />
 
     <div class="map-view__filters">
       <button
@@ -330,13 +330,6 @@ const handleAddToCart = (place) => {
   if (!exists) {
     cartItems.value.push(place)
   }
-
-  if (!isCartOpen.value) {
-    viewMode.value = 'category'
-    selectedCourse.value = null
-    selectedPlace.value = null
-    renderPlaces()
-  }
 }
 
 const removeFromCart = (place) => {
@@ -460,6 +453,5 @@ onBeforeUnmount(() => {
   border-radius: 12px;
   overflow: hidden;
   background: #f1f5f9;
-
 }
 </style>
