@@ -6,8 +6,13 @@
         :src="place.firstimage"
         :alt="place.title"
         class="place-card__image"
+        @click.stop.prevent="handleSelectPlace"
       />
-      <div v-else class="place-card__image place-card__image--empty">
+      <div
+        v-else
+        class="place-card__image place-card__image--empty"
+        @click.stop.prevent="handleSelectPlace"
+      >
         이미지 없음
       </div>
     </div>
@@ -18,7 +23,7 @@
 
       <div class="place-card__actions">
         <button class="place-card__btn" @click="emit('add-to-cart', place)">
-          + 장바구니
+          + 보관
         </button>
 
         <button class="place-card__like" @click="toggleLike">
@@ -39,11 +44,15 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['add-to-cart'])
+const emit = defineEmits(['add-to-cart', 'select-place'])
 const likeCount = ref(0)
 
 const toggleLike = () => {
   likeCount.value += 1
+}
+
+const handleSelectPlace = () => {
+  emit('select-place', props.place)
 }
 </script>
 
@@ -67,6 +76,7 @@ const toggleLike = () => {
   height: 180px;
   object-fit: cover;
   display: block;
+  cursor: pointer;
 }
 
 .place-card__image--empty {
