@@ -12,7 +12,7 @@
           @keydown.space.prevent="togglePopup"
         >
           <h3>서울 여행 코스</h3>
-          <p>클릭하여 추천 여행 코스를 확인해보세요.</p>
+          <p>여기를 클릭하여 추천 여행 코스를 확인해보세요.</p>
         </div>
       </div>
     </div>

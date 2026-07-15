@@ -3,6 +3,7 @@
     <div class="cart__header">
       <button class="cart__toggle" @click="emit('toggle-cart')">
         {{ isOpen ? '보관함 닫기' : '보관함 열기' }}
+        <span v-if="items.length" class="cart__badge" aria-hidden="true">{{ items.length }}</span>
       </button>
       <button v-if="items.length" class="cart__clear" @click="emit('clear-cart')">
         보관함 초기화
@@ -71,11 +72,29 @@ const emit = defineEmits(['toggle-cart', 'remove-from-cart', 'clear-cart', 'sele
   border-radius: 999px;
   padding: 0.4rem 0.7rem;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .cart__toggle {
   background: #2563eb;
   color: white;
+  position: relative;
+}
+
+.cart__badge {
+  display: inline-flex;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  align-items: center;
+  justify-content: center;
+  background: #ef4444;
+  color: white;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  margin-left: 6px;
 }
 
 .cart__clear {

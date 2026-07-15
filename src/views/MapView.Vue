@@ -43,6 +43,7 @@
       :title="listTitle"
       :description="listDescription"
       :places="displayedPlaces"
+      :allow-no-image="(viewMode === 'cart' && isCartOpen) || (viewMode === 'course' && selectedCourse)"
       @select-place="handleSelectPlace"
       @add-to-cart="handleAddToCart"
     />
@@ -185,13 +186,15 @@ const listDescription = computed(() => {
   if (viewMode.value === 'cart' && isCartOpen.value) {
     return '보관함에 담긴 장소만 지도와 목록에 표시됩니다.'
   }
-  return '선택한 카테고리 기준으로 추천 장소를 보여줍니다.'
+  return '선택한 카테고리 기준으로 추천 장소 6곳을 보여줍니다.'
 })
 
 const renderPlaces = () => {
   if (!map.value) return
 
-  if (markerLayer) {
+  if (!markerLayer) {
+    markerLayer = L.layerGroup().addTo(map.value)
+  } else {
     markerLayer.clearLayers()
   }
 
@@ -200,6 +203,7 @@ const renderPlaces = () => {
   places.forEach((place) => {
     const lat = parseFloat(place.mapy)
     const lng = parseFloat(place.mapx)
+    if (Number.isNaN(lat) || Number.isNaN(lng)) return
     const marker = L.marker([lat, lng])
 
     marker.on('click', () => {
@@ -266,7 +270,6 @@ const toggleCart = () => {
     selectedCourse.value = null
     selectedPlace.value = null
     renderPlaces()
-    // 보관함을 연 경우 지도도 보관함 장소들 중 첫 장소로 이동
     const cartPlaces = getPlacesForCart()
     if (cartPlaces.length > 0) {
       flyToFirstValidPlace(cartPlaces, 13)
@@ -337,7 +340,6 @@ const clearCart = () => {
   renderPlaces()
 }
 
-// 기존 watch는 유지하되, 보관함이 열려 있으면 좌표 이동도 수행하도록 확장
 watch(cartItems, () => {
   if (viewMode.value === 'cart' && isCartOpen.value) {
     renderPlaces()
@@ -365,6 +367,9 @@ const initMap = () => {
 
   renderPlaces()
 
+  map.value.on('moveend', renderPlaces)
+  map.value.on('zoomend', renderPlaces)
+
   setTimeout(() => {
     map.value?.invalidateSize()
   }, 200)
@@ -375,7 +380,11 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  map.value?.remove()
+  if (map.value) {
+    map.value.off('moveend', renderPlaces)
+    map.value.off('zoomend', renderPlaces)
+    map.value.remove()
+  }
   map.value = null
   markerLayer = null
 })

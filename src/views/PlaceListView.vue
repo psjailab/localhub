@@ -37,13 +37,34 @@ const props = defineProps({
   places: {
     type: Array,
     default: () => []
+  },
+  // true면 이미지 유무 상관없이 props.places 그대로 보여줌 (보관함/코스용)
+  allowNoImage: {
+    type: Boolean,
+    default: false
   }
 })
 
 const emit = defineEmits(['select-place', 'add-to-cart'])
 
+const shuffleArray = (arr) => {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
 const displayedPlaces = computed(() => {
-  return [...props.places].slice(0, 6)
+  const src = props.places || []
+  if (props.allowNoImage) {
+    // 보관함 또는 코스일 때: 이미지 유무 상관없이 전달된 순서대로 최대 6개
+    return src.slice(0, 6)
+  }
+  // 카테고리용: 이미지 있는 항목만 무작위로 섞어 6개
+  const withImage = src.filter((p) => p && p.firstimage)
+  return shuffleArray(withImage).slice(0, 6)
 })
 </script>
 
