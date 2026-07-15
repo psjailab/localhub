@@ -2,7 +2,7 @@
   <div class="map-view">
     <h2>지도 화면</h2>
 
-    <CourseSelect @select-course="handleSelectCourse" @reset-course-selection="handleResetCourseSelection" />
+    <CourseSelect @select-course="handleSelectCourse" @reset-course-selection="handleResetCourseSelection" />>
 
     <div class="map-view__filters">
       <button
@@ -20,6 +20,8 @@
       <div ref="mapContainer" class="map-view__map"></div>
 
       <div class="map-view__side">
+        <Chatbot />
+
         <div v-if="selectedPlace" class="map-view__card">
           <PlaceCard
             :place="selectedPlace"
@@ -58,6 +60,7 @@ import PlaceCard from '../components/PlaceCard.vue'
 import PlaceListView from './PlaceListView.vue'
 import Cart from '../components/Cart.vue'
 import CourseSelect from '../components/CourseSelect.vue'
+import Chatbot from '../components/Chatbot.vue'
 
 import SeoulTourData from '../../day03/data/서울/서울_관광지.json'
 import SeoulLeportsData from '../../day03/data/서울/서울_레포츠.json'
@@ -420,7 +423,7 @@ onBeforeUnmount(() => {
 
 .map-view__content {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1.5fr 360px;
   gap: 1rem;
   align-items: start;
 }
@@ -432,5 +435,6 @@ onBeforeUnmount(() => {
   border-radius: 12px;
   overflow: hidden;
   background: #f1f5f9;
+
 }
 </style>
