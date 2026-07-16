@@ -30,7 +30,7 @@
           </p>
           <div class="hero-actions">
             <router-link to="/" class="primary-btn">Start exploring</router-link>
-            <router-link to="/board" class="secondary-btn">Join the community</router-link>
+            <router-link to="/board" class="primary-btn">Join the community</router-link>
           </div>
         </div>
 
