@@ -13,13 +13,14 @@
 
       <div class="messages">
         <div
-        v-for="message in messages"
-        :key="message.id"
+          v-for="(message, index) in messages"
+          :key="`${message.role}-${index}`"
+          class="msg"
+          :class="{ user: message.role === 'user' }"
         >
-        {{ message.content }}
           <div class="bubble">
-            <div class="role">{{ m.role === 'user' ? '사용자' : '챗봇' }}</div>
-            <div class="text">{{ m.content }}</div>
+            <div class="role">{{ message.role === 'user' ? '사용자' : '챗봇' }}</div>
+            <div class="text">{{ message.content }}</div>
           </div>
         </div>
       </div>
