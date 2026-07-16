@@ -78,7 +78,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import courseData from '../../day03/data/서울/서울_여행코스.json'
-import touristData from '../../day03/data/서울/서울_관광지.json'
 
 const props = defineProps({
   selectedCourse: {
@@ -164,10 +163,7 @@ const themeDescription = computed(() => {
 })
 
 function pickCourseItems(weatherState) {
-  const pool = [
-    ...(Array.isArray(courseData?.items) ? courseData.items : []),
-    ...(Array.isArray(touristData?.items) ? touristData.items : [])
-  ]
+  const pool = Array.isArray(courseData?.items) ? courseData.items : []
 
   if (!pool.length) return []
 
@@ -385,13 +381,6 @@ onMounted(() => {
   font-weight: 700;
   color: #a8a29e;
   text-transform: uppercase;
-}
-
-.weather-theme-title {
-  margin: 0.45rem 0 0.35rem;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #1c1917;
 }
 
 .weather-theme-title {
