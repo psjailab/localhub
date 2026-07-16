@@ -1,6 +1,6 @@
 <template>
   <div class="map-view">
-    <h2>지도 화면</h2>
+    <h2>서울 여행 지도</h2>
 
     <CourseSelect @select-course="handleSelectCourse" @reset-course-selection="handleResetCourseSelection" />
 
@@ -200,19 +200,19 @@ const listTitle = computed(() => {
     return selectedCourse.value.title
   }
   if (viewMode.value === 'cart' && isCartOpen.value) {
-    return '보관함 장소'
+    return '보관함'
   }
   return `${selectedCategory.value} 추천 장소`
 })
 
 const listDescription = computed(() => {
   if (viewMode.value === 'course' && selectedCourse.value) {
-    return '선택한 코스와 관련된 장소들을 보여줍니다.'
+    return '선택한 코스의 장소들을 보여줍니다.'
   }
   if (viewMode.value === 'cart' && isCartOpen.value) {
-    return '보관함에 담긴 장소만 지도와 목록에 표시됩니다.'
+    return '보관함에 담긴 장소만 표시됩니다.'
   }
-  return '선택한 카테고리 기준으로 추천 장소 6곳을 보여줍니다.'
+  return '선택한 카테고리 기준으로 추천 장소를 보여줍니다.'
 })
 
 const renderPlaces = () => {

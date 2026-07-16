@@ -1,6 +1,6 @@
 <template>
   <div style="padding:16px;">
-    <h2>익명 커뮤니티 게시판</h2>
+    <h2>익명 커뮤니티</h2>
 
     <div style="background:#fff8e1; padding:8px; border:1px solid #ffe082; margin-bottom:12px;">
       브라우저의 캐시/LocalStorage 초기화 시 게시글이 삭제됩니다. 중요한 데이터는 별도 백업하세요.

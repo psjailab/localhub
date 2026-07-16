@@ -24,7 +24,7 @@
       <div class="course-select__popup-card">
         <div class="course-select__popup-header">
           <div>
-            <h4>{{ viewMode === 'themes' ? '코스 테마 선택' : '코스 목록' }}</h4>
+            <h4>{{ viewMode === 'themes' ? '코스 테마 선택' : '코스 리스트' }}</h4>
             <p>
               {{ viewMode === 'themes' ? '코스를 선택하세요.' : '코스를 선택하면 지도에 표시됩니다.' }}
             </p>

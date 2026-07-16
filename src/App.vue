@@ -10,7 +10,7 @@
     <!-- 탭 메뉴 (지도 / 커뮤니티) -->
     <nav class="flex space-x-2 bg-gray-100 p-1 rounded-lg">
       <router-link to="/" class="px-4 py-1.5 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-900 transition" active-class="bg-white shadow-sm text-blue-600">
-        지도탐색
+        지도
       </router-link>
       <router-link to="/board" class="px-4 py-1.5 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-900 transition" active-class="bg-white shadow-sm text-blue-600">
         커뮤니티
