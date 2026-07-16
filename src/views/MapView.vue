@@ -285,8 +285,16 @@ const findTopLeftPlace = (places) => {
     }, null)?.place || null
 }
 
-const orderPlacesByNearestFromStart = (places) => {
-  const remaining = places
+const computePathDistance = (nodes) => {
+  return nodes.reduce((sum, current, index) => {
+    if (index === 0) return 0
+    const prev = nodes[index - 1]
+    return sum + getDistance(prev.lat, prev.lng, current.lat, current.lng)
+  }, 0)
+}
+
+const orderPlacesByShortestPath = (places) => {
+  const nodes = places
     .map((place) => ({
       place,
       lat: parseFloat(place.mapy),
@@ -294,21 +302,52 @@ const orderPlacesByNearestFromStart = (places) => {
     }))
     .filter((entry) => !Number.isNaN(entry.lat) && !Number.isNaN(entry.lng))
 
-  if (remaining.length === 0) return []
+  if (nodes.length === 0) return []
 
   const startPlace = findTopLeftPlace(places)
-  if (!startPlace) return []
+  if (!startPlace) return nodes.map((entry) => entry.place)
 
-  const ordered = []
-  const startIndex = remaining.findIndex((entry) => entry.place === startPlace)
-  let current = remaining.splice(startIndex, 1)[0]
-  ordered.push(current.place)
+  const startIndex = nodes.findIndex((entry) => entry.place === startPlace)
+  if (startIndex === -1) return nodes.map((entry) => entry.place)
 
-  while (remaining.length > 0) {
+  const startNode = nodes.splice(startIndex, 1)[0]
+  const remaining = nodes
+
+  const MAX_BRUTE_FORCE = 8
+  if (remaining.length <= MAX_BRUTE_FORCE) {
+    let bestOrder = null
+    let bestDistance = Infinity
+
+    const permute = (arr, start = 0) => {
+      if (start === arr.length) {
+        const distance = computePathDistance([startNode, ...arr])
+        if (distance < bestDistance) {
+          bestDistance = distance
+          bestOrder = arr.map((entry) => entry.place)
+        }
+        return
+      }
+
+      for (let i = start; i < arr.length; i += 1) {
+        ;[arr[start], arr[i]] = [arr[i], arr[start]]
+        permute(arr, start + 1)
+        ;[arr[start], arr[i]] = [arr[i], arr[start]]
+      }
+    }
+
+    permute(remaining)
+    return [startNode.place, ...(bestOrder || remaining.map((entry) => entry.place))]
+  }
+
+  // 너무 많은 경우에는 시작점 고정 후 근접 탐색을 fallback
+  const fallback = [...remaining]
+  const orderedFallback = []
+  let current = startNode
+  while (fallback.length > 0) {
     let bestIndex = 0
     let bestDistance = Infinity
 
-    remaining.forEach((entry, index) => {
+    fallback.forEach((entry, index) => {
       const dist = getDistance(current.lat, current.lng, entry.lat, entry.lng)
       if (dist < bestDistance) {
         bestDistance = dist
@@ -316,11 +355,11 @@ const orderPlacesByNearestFromStart = (places) => {
       }
     })
 
-    current = remaining.splice(bestIndex, 1)[0]
-    ordered.push(current.place)
+    current = fallback.splice(bestIndex, 1)[0]
+    orderedFallback.push(current.place)
   }
 
-  return ordered
+  return [startNode.place, ...orderedFallback]
 }
 
 const orderPlacesByNearest = (places) => {
@@ -369,7 +408,7 @@ const renderRoute = () => {
   const routePlaces = getRoutePlaces()
   const orderedRoutePlaces =
     viewMode.value === 'course' && selectedCourse.value
-      ? orderPlacesByNearestFromStart(routePlaces)
+      ? orderPlacesByShortestPath(routePlaces)
       : orderPlacesByNearest(routePlaces)
 
   const coordinates = orderedRoutePlaces
