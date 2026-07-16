@@ -32,7 +32,13 @@
         <h3 class="board-view__detail-title">{{ selected.title }}</h3>
 
         <div class="board-view__detail-stats">
-          <span class="board-view__stat">♥ {{ selected.likes || 0 }}</span>
+          <button
+  type="button"
+  class="board-view__stat board-view__like-button"
+  @click="handleLike(selected)"
+>
+  ♥ {{ selected.likes || 0 }}
+</button>
           <span class="board-view__stat">👁️ {{ selected.views || 0 }}</span>
         </div>
 
