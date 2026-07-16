@@ -35,10 +35,7 @@
         </div>
 
         <div class="hero-visual">
-          <img
-            src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80"
-            alt="Scenic travel landscape"
-          />
+          <img src="/seoul.png" alt="Seoul" />
           <div class="floating-card">
             <strong>Seoul</strong>
           </div>
