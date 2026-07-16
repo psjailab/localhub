@@ -29,7 +29,6 @@ function onViewInc(post) { emit('viewInc', post); }
           <div style="flex:1;">
             <strong @click="() => { onViewInc(post); onView(post); }" style="cursor:pointer;">{{ post.title }}</strong>
             <div style="font-size:12px; color:#666;">{{ new Date(post.createdAt).toLocaleString() }}</div>
-            <div style="margin-top:8px; font-size:14px; color:#333;">{{ post.content }}</div>
           </div>
           <div style="text-align:right;">
             <div style="margin-bottom:6px;">
