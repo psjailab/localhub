@@ -1,6 +1,6 @@
 <template>
   <div class="map-view">
-    <h2>서울 여행 지도</h2>
+    <h1>서울 여행 지도</h1>
 
     <CourseSelect
       @select-course="handleSelectCourse"
@@ -65,6 +65,25 @@
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import iconUrl from 'leaflet/dist/images/marker-icon.png'
+import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png'
+import shadowUrl from 'leaflet/dist/images/marker-shadow.png'
+
+delete L.Icon.Default.prototype._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl,
+  iconUrl,
+  shadowUrl
+})
+
+const defaultIcon = L.icon({
+  iconUrl,
+  iconRetinaUrl,
+  shadowUrl,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34]
+})
 
 import PlaceCard from '../components/PlaceCard.vue'
 import PlaceListView from '../components/PlaceListView.vue'
@@ -249,7 +268,7 @@ const renderPlaces = () => {
     const lng = parseFloat(place.mapx)
     if (Number.isNaN(lat) || Number.isNaN(lng)) return
 
-    const marker = L.marker([lat, lng])
+    const marker = L.marker([lat, lng], { icon: defaultIcon })
 
     marker.on('click', () => {
       selectedPlace.value = place

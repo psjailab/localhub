@@ -3,7 +3,7 @@
     <div class="weather-route-card">
       <div class="weather-route-header">
         <div>
-          <p class="weather-route-eyebrow">서울 날씨 & 추천 코스</p>
+          <h3>서울 날씨 & 추천 코스</h3>
         </div>
 
         <div class="weather-route-actions">
