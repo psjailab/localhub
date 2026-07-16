@@ -1,6 +1,6 @@
 <template>
   <div class="map-view">
-    <h2>서울 여행 지도</h2>
+    <h1>서울 여행 지도</h1>
 
     <CourseSelect
       @select-course="handleSelectCourse"
