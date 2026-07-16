@@ -18,38 +18,56 @@
       @viewInc="handleViewInc"
     />
 
-    <div v-if="selected" style="margin-top:16px; padding:12px; border:1px solid #ddd; background:#fff;">
-      <h3>{{ selected.title }}</h3>
-      <div style="font-size:12px;color:#666;">{{ new Date(selected.createdAt).toLocaleString() }}</div>
-      <p style="white-space:pre-wrap; margin-top:8px;">{{ selected.content }}</p>
-      <div style="margin-top:8px;">
-        <button @click="promptPasswordForEdit(selected)">수정</button>
-        <button @click="promptPasswordForDelete(selected)" style="margin-left:6px;">삭제</button>
-        <button @click="selected = null" style="margin-left:6px;">닫기</button>
-      </div>
+    <div v-if="selected" class="board-view__detail-wrap">
+      <button type="button" class="board-view__back-link" @click="selected = null">
+        ← 목록으로 돌아가기
+      </button>
 
-      <!-- 댓글 영역 -->
-      <div style="margin-top:12px;">
-        <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
-          <button @click="toggleTopCommentForm">{{ showTopCommentForm ? '댓글 폼 닫기' : '댓글 작성' }}</button>
+      <section class="board-view__detail-card">
+        <div class="board-view__detail-meta">
+          <span class="board-view__tag">동네 소식</span>
+          <span class="board-view__detail-date">{{ new Date(selected.createdAt).toLocaleString() }}</span>
         </div>
 
-        <!-- top-level comment form -->
-        <div v-if="showTopCommentForm" style="margin-bottom:12px;">
+        <h3 class="board-view__detail-title">{{ selected.title }}</h3>
+
+        <div class="board-view__detail-stats">
+          <span class="board-view__stat">♥ {{ selected.likes || 0 }}</span>
+          <span class="board-view__stat">👁️ {{ selected.views || 0 }}</span>
+        </div>
+
+        <p class="board-view__detail-body">{{ selected.content }}</p>
+
+        <div class="board-view__detail-actions">
+          <button type="button" @click="promptPasswordForEdit(selected)">수정</button>
+          <button type="button" @click="promptPasswordForDelete(selected)">삭제</button>
+          <button type="button" @click="selected = null">닫기</button>
+        </div>
+      </section>
+
+      <section class="board-view__comment-wrap">
+        <div class="board-view__comment-header">
+          <h4>댓글 {{ (selected.comments || []).length }}</h4>
+          <button type="button" class="board-view__comment-button" @click="toggleTopCommentForm">
+            {{ showTopCommentForm ? '댓글 폼 닫기' : '댓글 작성' }}
+          </button>
+        </div>
+
+        <div v-if="showTopCommentForm" class="board-view__comment-form-wrap">
           <CommentForm :postId="selected.id" @save="onCommentSave" @cancel="onCommentCancel" />
         </div>
 
-        <!-- comment list -->
-        <CommentList
-          :postId="selected.id"
-          :comments="selected.comments || []"
-          @reply="onCommentReply"
-          @edit="onCommentEdit"
-          @delete="onCommentRequestDelete"
-        />
+        <div class="board-view__comment-list-wrap">
+          <CommentList
+            :postId="selected.id"
+            :comments="selected.comments || []"
+            @reply="onCommentReply"
+            @edit="onCommentEdit"
+            @delete="onCommentRequestDelete"
+          />
+        </div>
 
-        <!-- inline reply/edit form -->
-        <div v-if="activeCommentForm.show" style="margin-top:12px;">
+        <div v-if="activeCommentForm.show" class="board-view__comment-form-wrap">
           <CommentForm
             :postId="selected.id"
             :initial="activeCommentForm.initial"
@@ -58,7 +76,7 @@
             @cancel="onCommentCancel"
           />
         </div>
-      </div>
+      </section>
     </div>
 
     <!-- 비밀번호 입력 모달 -->
@@ -254,7 +272,6 @@ function onCommentEdit(comment) {
   showTopCommentForm.value = false;
 }
 function onCommentRequestDelete(comment) {
-  // open password modal for comment delete; store postId in meta
   pwdPrompt.value = {
     show: true,
     targetId: comment.id,
@@ -284,7 +301,6 @@ function onPwdConfirm() {
   const provided = pwdPrompt.value.value || '';
   const action = pwdPrompt.value.action;
 
-  // handle comment deletion request
   if (action === 'delete_comment') {
     const postId = pwdPrompt.value.meta?.postId;
     const preview = pwdPrompt.value.meta?.preview || '';
@@ -298,13 +314,11 @@ function onPwdConfirm() {
       pwdPrompt.value.error = '비밀번호가 일치하지 않습니다.';
       return;
     }
-    // password ok -> close modal and show confirm UI
     closePwdPrompt();
     confirmPendingComment.value = { show: true, postId, commentId: id, preview };
     return;
   }
 
-  // post-level flows
   const target = getPostById(id);
   if (!target) { pwdPrompt.value.error = '글을 찾을 수 없습니다.'; return; }
   if (target.password !== provided) { pwdPrompt.value.error = '비밀번호가 일치하지 않습니다.'; return; }
