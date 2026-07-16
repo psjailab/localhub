@@ -13,10 +13,10 @@
 
       <div class="messages">
         <div
-          v-for="(m, i) in messages"
-          :key="i"
-          :class="['msg', m.role]"
+        v-for="message in messages"
+        :key="message.id"
         >
+        {{ message.content }}
           <div class="bubble">
             <div class="role">{{ m.role === 'user' ? '사용자' : '챗봇' }}</div>
             <div class="text">{{ m.content }}</div>
@@ -79,13 +79,36 @@ async function send() {
     // API 서버에는 system 지침을 맨 앞에 명확하게 정의하고, 그 뒤로 주고받은 대화만 전달합니다.
     const apiMessages = [
       {
-        role: 'system',
-        content: '당신은 LocalHub의 친절한 AI 가이드 챗봇입니다. 사용자의 질문에 로컬 전문가의 관점에서 친절하고 명확하게 답변해 주세요.'
+        role: "system",
+        content: `
+    당신은 LocalHub AI 챗봇입니다.
+
+    규칙
+
+    1. 사용자의 질문에는 가능한 한 바로 답변합니다.
+
+    2. 정보가 조금 부족하더라도 일반적인 상황을 가정하여 먼저 답변합니다.
+
+    3. 추가 질문은 정말 필요한 경우에만 합니다.
+
+    4. 추가 질문은 최대 한 개만 합니다.
+
+    5. 절대로 질문만 하고 답변을 끝내지 않습니다.
+
+    6. 항상
+
+    - 먼저 답변
+    - 마지막에 추가 질문
+
+    순서를 지킵니다.
+
+    7. 추천을 요청받으면 전국 기준으로 먼저 추천한 뒤,
+    지역이 필요하면 마지막에 물어봅니다.
+
+    8. 사용자의 질문 의도를 먼저 해결하는 것이 가장 중요합니다.
+    `
       },
-      ...messages.value.map(m => ({
-        role: m.role,
-        content: m.content
-      }))
+      ...messages.value
     ]
 
     // 3. chat/completions 호출
@@ -98,7 +121,7 @@ async function send() {
       body: JSON.stringify({
         model: 'gpt-5-mini', // 또는 'gpt-3.5-turbo' 등 범용적인 모델 사용 권장
         messages: apiMessages,
-        max_completion_tokens: 1536,     // max_completion_tokens 대신 표준 max_tokens 사용
+        max_completion_tokens: 1024,     // max_completion_tokens 대신 표준 max_tokens 사용
         temperature: 1
       })
     })
@@ -108,11 +131,34 @@ async function send() {
       throw new Error(`[API Error ${resp.status}] ${errText}`)
     }
 
-    const data = await resp.json()
+    const data = await resp.json();
+    console.log("========== OpenAI Response ==========");
+    console.log(data);
+
+    console.log("========== Choice ==========");
+    console.log(data.choices?.[0]);
+
+    console.log("========== Message ==========");
+    console.log(data.choices?.[0]?.message);
     console.log('OpenAI response:', data)
 
     // 4. 안전한 파싱
-    const assistant = data?.choices?.[0]?.message?.content || null
+    const choice = data?.choices?.[0];
+
+    let assistant = "";
+
+    if (typeof choice?.message?.content === "string") {
+    assistant = choice.message.content;
+    }
+    else if (Array.isArray(choice?.message?.content)) {
+    assistant = choice.message.content
+        .map(item => item.text || "")
+        .join("");
+    }
+
+    if (!assistant.trim()) {
+    assistant = "죄송합니다. 답변을 생성하지 못했습니다.";
+    }
 
     if (assistant && assistant.trim()) {
       messages.value.push({ role: 'assistant', content: assistant.trim() })
