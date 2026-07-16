@@ -4,6 +4,8 @@
 
     <CourseSelect @select-course="handleSelectCourse" @reset-course-selection="handleResetCourseSelection" />
 
+    <Weatherinfo />
+
     <div class="map-view__filters">
       <button
         v-for="category in categories"
@@ -61,6 +63,7 @@ import PlaceListView from '../components/PlaceListView.vue'
 import Cart from '../components/Cart.vue'
 import CourseSelect from '../components/CourseSelect.vue'
 import Chatbot from '../components/Chatbot.vue'
+import Weatherinfo from '../components/Weatherinfo.vue'
 
 import SeoulTourData from '../../day03/data/서울/서울_관광지.json'
 import SeoulLeportsData from '../../day03/data/서울/서울_레포츠.json'
