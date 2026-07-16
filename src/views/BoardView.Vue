@@ -102,6 +102,7 @@
     <div style="margin-top:12px; font-size:12px; color:#666;">
       LocalStorage 사용량: {{ humanSize(storageSize) }} / 약 5MB 제한
     </div>
+    <Chatbot />
   </div>
 </template>
 
@@ -112,6 +113,7 @@ import BoardForm from '../components/BoardForm.vue';
 import BoardList from '../components/BoardList.vue';
 import CommentForm from '../components/CommentForm.vue';
 import CommentList from '../components/CommentList.vue';
+import Chatbot from '../components/Chatbot.vue'
 import {
   getPosts, createPost, updatePost, deletePost, getPostById,
   incView, toggleLike, currentStorageSize,
