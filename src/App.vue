@@ -1,27 +1,57 @@
 <template>
-  <!-- [상단 메뉴바 영역] -->
-  <header class="bg-white shadow-sm z-20 h-16 flex items-center justify-between px-4 sm:px-6">
-    <!-- 로고 및 지역 표시 -->
-    <div class="flex items-center space-x-2">
-      <h1 class="text-xl font-bold text-blue-600">LocalHub</h1>
-      <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded">서울</span>
-    </div>
-    
-    <!-- 탭 메뉴 (지도 / 커뮤니티) -->
-    <nav class="flex space-x-2 bg-gray-100 p-1 rounded-lg">
-      <router-link to="/" class="px-4 py-1.5 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-900 transition" active-class="bg-white shadow-sm text-blue-600">
-        여행지도
+  <div class="app-shell">
+    <header class="topbar">
+      <router-link to="/" class="brand-wrap">
+        <div class="brand-mark">L</div>
+        <div>
+          <p class="brand-name">LocalHub</p>
+          <p class="brand-sub">Travel • Community</p>
+        </div>
       </router-link>
-      <router-link to="/board" class="px-4 py-1.5 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-900 transition" active-class="bg-white shadow-sm text-blue-600">
-        커뮤니티
-      </router-link>
-    </nav>
-  </header>
-  
-  <!-- [바뀌는 화면 영역] -->
-  <main class="flex-1 overflow-hidden relative p-4">
-    <router-view></router-view>
-  </main>
+
+      <nav class="nav-pills" aria-label="Primary navigation">
+        <router-link to="/" class="nav-pill" active-class="nav-pill--active">
+          <span>Discover</span>
+        </router-link>
+        <router-link to="/board" class="nav-pill" active-class="nav-pill--active">
+          <span>Community</span>
+        </router-link>
+      </nav>
+
+      <button class="ghost-action">Plan a stay</button>
+    </header>
+
+    <main class="main-shell">
+      <section class="hero-panel">
+        <div class="hero-copy">
+          <p class="eyebrow">Premium regional living</p>
+          <h1>Find your next favorite place with calm confidence.</h1>
+          <p class="hero-text">
+            Explore neighborhoods, local stories, and thoughtful recommendations in a refined experience crafted for modern travelers.
+          </p>
+          <div class="hero-actions">
+            <router-link to="/" class="primary-btn">Start exploring</router-link>
+            <router-link to="/board" class="secondary-btn">Join the community</router-link>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <img
+            src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80"
+            alt="Scenic travel landscape"
+          />
+          <div class="floating-card">
+            <p>Featured now</p>
+            <strong>Seoul • after-hours city walks</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-surface">
+        <router-view />
+      </section>
+    </main>
+  </div>
 </template>
 
 <script setup>
