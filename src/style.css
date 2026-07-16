@@ -1203,3 +1203,231 @@ select:focus-visible {
     min-height: 420px;
   }
 }
+/* ===== board-view 전용 스타일 ===== */
+.board-view {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+/* 상단 타이틀 영역 */
+.board-view h2 {
+  margin: 0;
+  font-size: clamp(2.2rem, 3.2vw, 3rem);
+  line-height: 1.03;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.board-view h2::before {
+  content: "LOCAL VOICES & STORIES";
+  display: block;
+  margin-bottom: 14px;
+  font-size: 0.78rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: var(--accent);
+}
+.board-view h2::after {
+  content: "이웃들과 일상을 나누고, 숨겨진 로컬 스토리를 발견해보세요. 당신의 조용한 일상에 활기를 더해줄 이야기들이 기다리고 있습니다.";
+  display: block;
+  margin-top: 18px;
+  max-width: 760px;
+  color: var(--text-soft);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* 안내 박스 */
+.board-view .notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(16, 118, 255, 0.18);
+  background: rgba(235, 244, 255, 0.86);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  color: #344155;
+}
+.board-view .notice::before {
+  content: "i";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(0, 122, 255, 0.14);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* 검색 영역 */
+.board-view input[placeholder="검색 (제목/내용)"] {
+  width: 100%;
+  min-width: 220px;
+  padding: 14px 18px !important;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  background: white !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06) !important;
+  color: var(--text);
+  font-size: 0.98rem;
+}
+.board-view select {
+  min-width: 120px;
+  padding: 12px 18px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  background: white !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06) !important;
+  color: var(--text);
+  font-weight: 700;
+}
+.board-view button {
+  border-radius: 999px !important;
+  padding: 12px 20px !important;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  background: white !important;
+  color: var(--text) !important;
+  font-weight: 700;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05) !important;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.board-view button:hover {
+  transform: translateY(-1px);
+}
+.board-view button:active {
+  transform: translateY(0);
+}
+.board-view .board-list > div button,
+.board-view .board-list button {
+  background: var(--accent) !important;
+  color: white !important;
+  border-color: transparent !important;
+  box-shadow: 0 14px 34px rgba(0, 122, 255, 0.18) !important;
+}
+
+/* 게시글 카드 */
+.board-view .board-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.board-view .board-list ul li {
+  position: relative;
+  margin-bottom: 0 !important;
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+  padding: 22px !important;
+  border-radius: 26px !important;
+  background: linear-gradient(180deg, #ffffff, #fbfbff) !important;
+  border: 1px solid rgba(17, 17, 17, 0.04) !important;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06) !important;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.board-view .board-list ul li:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 56px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* 리스트 내부 레이아웃 덮어쓰기 */
+.board-view .board-list ul li > div[style] {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 20px !important;
+}
+.board-view .board-list ul li > div > div:first-child {
+  flex: 1 1 auto !important;
+  min-width: 0;
+  position: relative;
+  padding-right: 170px !important;
+}
+.board-view .board-list ul li > div > div:first-child strong {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.board-view .board-list ul li > div > div:first-child div {
+  color: var(--caption);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.board-view .board-list ul li > div > div:first-child div:nth-child(2) {
+  position: absolute !important;
+  top: 20px !important;
+  right: 18px !important;
+  padding: 6px 12px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06) !important;
+}
+.board-view .board-list ul li > div > div:first-child div:nth-child(2) + div {
+  margin-top: 28px !important;
+  color: var(--text-soft) !important;
+}
+
+/* 오른쪽 액션 영역 */
+.board-view .board-list ul li > div > div:last-child {
+  width: 158px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  align-items: flex-end !important;
+  text-align: right !important;
+}
+.board-view .board-list ul li > div > div:last-child button {
+  width: 100%;
+  padding: 10px 12px !important;
+  border-radius: 14px !important;
+  background: linear-gradient(180deg, #fafafa, #ffffff) !important;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  color: var(--text) !important;
+}
+.board-view .board-list ul li > div > div:last-child div {
+  font-size: 12px;
+  color: var(--caption);
+}
+.board-view .board-list ul li > div > div:last-child > div:last-child button {
+  width: auto !important;
+  background: transparent !important;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  color: var(--text-soft) !important;
+}
+.board-view .board-list ul li > div > div:last-child > div:last-child button:hover {
+  color: var(--text) !important;
+}
+
+/* 빈 상태 */
+.board-view .board-list__empty {
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px dashed rgba(17, 17, 17, 0.08);
+  color: var(--text-soft);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+}
+
+/* 모바일 반응형 */
+@media (max-width: 720px) {
+  .board-view .board-list ul li > div[style],
+  .board-view .board-list ul li > div > div:last-child {
+    flex-direction: column !important;
+    width: 100% !important;
+    align-items: stretch !important;
+    text-align: left !important;
+  }
+  .board-view .board-list ul li > div > div:last-child {
+    width: 100% !important;
+  }
+  .board-view .board-list ul li > div > div:first-child {
+    padding-right: 0 !important;
+  }
+  .board-view h2 { font-size: 2rem; }
+}
