@@ -2,9 +2,16 @@
   <div class="map-view">
     <h2>서울 여행 지도</h2>
 
-    <CourseSelect @select-course="handleSelectCourse" @reset-course-selection="handleResetCourseSelection" />
+    <CourseSelect
+      @select-course="handleSelectCourse"
+      @reset-course-selection="handleResetCourseSelection"
+    />
 
-    <Weatherinfo />
+    <Weatherinfo
+      :selected-course="selectedCourse"
+      @select-course="handleSelectCourse"
+      @reset-course-selection="handleResetCourseSelection"
+    />
 
     <div class="map-view__filters">
       <button
@@ -58,6 +65,7 @@
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+
 import PlaceCard from '../components/PlaceCard.vue'
 import PlaceListView from '../components/PlaceListView.vue'
 import Cart from '../components/Cart.vue'
@@ -71,6 +79,7 @@ import SeoulCultureData from '../../day03/data/서울/서울_문화시설.json'
 import SeoulShoppingData from '../../day03/data/서울/서울_쇼핑.json'
 import SeoulAccommodationData from '../../day03/data/서울/서울_숙박.json'
 import SeoulFestivalData from '../../day03/data/서울/서울_축제공연행사.json'
+import SeoulCourseData from '../../day03/data/서울/서울_여행코스.json'
 
 const categories = ['관광지', '레포츠', '문화시설', '쇼핑', '숙박', '축제공연행사']
 const selectedCategory = ref('관광지')
@@ -117,7 +126,11 @@ const getPlacesByCategory = (category) => {
 const getPlacesForCourse = (course) => {
   if (!course?.title) return []
 
-  const keywords = course.title
+  const courseMatch = (SeoulCourseData?.items || []).find((item) => {
+    return item?.title && item.title === course.title
+  })
+
+  const keywords = (courseMatch?.title || course.title)
     .replace(/[^가-힣a-zA-Z0-9\s]/g, ' ')
     .split(/\s+/)
     .map((word) => word.trim())
@@ -235,6 +248,7 @@ const renderPlaces = () => {
     const lat = parseFloat(place.mapy)
     const lng = parseFloat(place.mapx)
     if (Number.isNaN(lat) || Number.isNaN(lng)) return
+
     const marker = L.marker([lat, lng])
 
     marker.on('click', () => {
@@ -261,8 +275,10 @@ const flyToFirstValidPlace = (places, zoom = 13) => {
     return !Number.isNaN(lat) && !Number.isNaN(lng)
   })
   if (!first) return
+
   const lat = parseFloat(first.mapy)
   const lng = parseFloat(first.mapx)
+
   if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
     map.value.flyTo([lat, lng], zoom, { duration: 0.8 })
   }
@@ -296,11 +312,13 @@ const handleResetCourseSelection = () => {
 
 const toggleCart = () => {
   isCartOpen.value = !isCartOpen.value
+
   if (isCartOpen.value) {
     viewMode.value = 'cart'
     selectedCourse.value = null
     selectedPlace.value = null
     renderPlaces()
+
     const cartPlaces = getPlacesForCart()
     if (cartPlaces.length > 0) {
       flyToFirstValidPlace(cartPlaces, 13)
