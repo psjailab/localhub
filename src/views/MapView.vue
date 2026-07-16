@@ -120,6 +120,7 @@ const categoryDataMap = {
 const mapContainer = ref(null)
 const map = ref(null)
 let markerLayer = null
+let routeLayer = null
 const visiblePlaces = ref([])
 
 const normalizeText = (value) =>
@@ -250,6 +251,147 @@ const listDescription = computed(() => {
   return '선택한 카테고리 기준으로 추천 장소를 보여줍니다.'
 })
 
+const getRoutePlaces = () => {
+  if (viewMode.value === 'course' && selectedCourse.value) {
+    return getPlacesForCourse(selectedCourse.value)
+  }
+
+  if (viewMode.value === 'cart' && isCartOpen.value) {
+    return getPlacesForCart()
+  }
+
+  return []
+}
+
+const getDistance = (lat1, lng1, lat2, lng2) => {
+  const dLat = lat2 - lat1
+  const dLng = lng2 - lng1
+  return Math.sqrt(dLat * dLat + dLng * dLng)
+}
+
+const findTopLeftPlace = (places) => {
+  return places
+    .map((place) => ({
+      place,
+      lat: parseFloat(place.mapy),
+      lng: parseFloat(place.mapx)
+    }))
+    .filter((entry) => !Number.isNaN(entry.lat) && !Number.isNaN(entry.lng))
+    .reduce((best, entry) => {
+      if (!best) return entry
+      if (entry.lat > best.lat) return entry
+      if (entry.lat === best.lat && entry.lng < best.lng) return entry
+      return best
+    }, null)?.place || null
+}
+
+const orderPlacesByNearestFromStart = (places) => {
+  const remaining = places
+    .map((place) => ({
+      place,
+      lat: parseFloat(place.mapy),
+      lng: parseFloat(place.mapx)
+    }))
+    .filter((entry) => !Number.isNaN(entry.lat) && !Number.isNaN(entry.lng))
+
+  if (remaining.length === 0) return []
+
+  const startPlace = findTopLeftPlace(places)
+  if (!startPlace) return []
+
+  const ordered = []
+  const startIndex = remaining.findIndex((entry) => entry.place === startPlace)
+  let current = remaining.splice(startIndex, 1)[0]
+  ordered.push(current.place)
+
+  while (remaining.length > 0) {
+    let bestIndex = 0
+    let bestDistance = Infinity
+
+    remaining.forEach((entry, index) => {
+      const dist = getDistance(current.lat, current.lng, entry.lat, entry.lng)
+      if (dist < bestDistance) {
+        bestDistance = dist
+        bestIndex = index
+      }
+    })
+
+    current = remaining.splice(bestIndex, 1)[0]
+    ordered.push(current.place)
+  }
+
+  return ordered
+}
+
+const orderPlacesByNearest = (places) => {
+  const remaining = places
+    .map((place) => ({
+      place,
+      lat: parseFloat(place.mapy),
+      lng: parseFloat(place.mapx)
+    }))
+    .filter((entry) => !Number.isNaN(entry.lat) && !Number.isNaN(entry.lng))
+
+  if (remaining.length === 0) return []
+
+  const ordered = []
+  let current = remaining.shift()
+  ordered.push(current.place)
+
+  while (remaining.length > 0) {
+    let bestIndex = 0
+    let bestDistance = Infinity
+
+    remaining.forEach((entry, index) => {
+      const dist = getDistance(current.lat, current.lng, entry.lat, entry.lng)
+      if (dist < bestDistance) {
+        bestDistance = dist
+        bestIndex = index
+      }
+    })
+
+    current = remaining.splice(bestIndex, 1)[0]
+    ordered.push(current.place)
+  }
+
+  return ordered
+}
+
+const renderRoute = () => {
+  if (!map.value) return
+
+  if (!routeLayer) {
+    routeLayer = L.layerGroup().addTo(map.value)
+  } else {
+    routeLayer.clearLayers()
+  }
+
+  const routePlaces = getRoutePlaces()
+  const orderedRoutePlaces =
+    viewMode.value === 'course' && selectedCourse.value
+      ? orderPlacesByNearestFromStart(routePlaces)
+      : orderPlacesByNearest(routePlaces)
+
+  const coordinates = orderedRoutePlaces
+    .map((place) => {
+      const lat = parseFloat(place.mapy)
+      const lng = parseFloat(place.mapx)
+      if (Number.isNaN(lat) || Number.isNaN(lng)) return null
+      return [lat, lng]
+    })
+    .filter(Boolean)
+
+  if (coordinates.length >= 2) {
+    L.polyline(coordinates, {
+      color: '#2563eb',
+      weight: 4,
+      opacity: 0.75,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(routeLayer)
+  }
+}
+
 const renderPlaces = () => {
   if (!map.value) return
 
@@ -276,6 +418,8 @@ const renderPlaces = () => {
 
     marker.addTo(markerLayer)
   })
+
+  renderRoute()
 }
 
 const selectCategory = (category) => {
@@ -314,7 +458,6 @@ const handleSelectCourse = (course) => {
     if (firstPlace) {
       const lat = parseFloat(firstPlace.mapy)
       const lng = parseFloat(firstPlace.mapx)
-
       if (map.value && !Number.isNaN(lat) && !Number.isNaN(lng)) {
         map.value.flyTo([lat, lng], 13, { duration: 0.8 })
       }
@@ -425,6 +568,7 @@ const initMap = () => {
   }).addTo(map.value)
 
   markerLayer = L.layerGroup().addTo(map.value)
+  routeLayer = L.layerGroup().addTo(map.value)
 
   renderPlaces()
 
@@ -448,6 +592,7 @@ onBeforeUnmount(() => {
   }
   map.value = null
   markerLayer = null
+  routeLayer = null
 })
 </script>
 
