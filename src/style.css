@@ -791,7 +791,8 @@ select:focus-visible {
   color: var(--accent);
 }
 .board-view h2::after {
-  content: "이웃들과 일상을 나누고, 숨겨진 로컬 스토리를 발견해보세요. 당신의 조용한 일상에 활기를 더해줄 이야기들이 기다리고 있습니다.";
+  content: "이웃들과 일상을 나누고, 숨겨진 로컬 스토리를 발견해보세요.\A당신의 조용한 일상에 활기를 더해줄 이야기들이 기다리고 있습니다.";
+  white-space: pre-line;
   display: block;
   margin-top: 18px;
   max-width: 760px;
@@ -1166,25 +1167,4 @@ select:focus-visible {
   color: var(--text);
   font-weight: 700;
   cursor: pointer;
-}
-
-.floating-card {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  color: white;
-}
-
-.floating-card strong {
-  display: inline-block;
-  transform: translateX(0);
-  color: white;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
