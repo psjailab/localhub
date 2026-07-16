@@ -1,9 +1,9 @@
 <template>
   <section class="course-select">
-    <div class="course-select__header">
-      <div class="course-select__title-row">
+    <div class="course-select__card">
+      <div class="course-select__header">
         <div
-          class="course-select__title-clickable"
+          class="course-select__title-row"
           role="button"
           :aria-expanded="isOpen"
           tabindex="0"
@@ -11,11 +11,17 @@
           @keydown.enter.prevent="togglePopup"
           @keydown.space.prevent="togglePopup"
         >
-          <h3>서울 여행 코스</h3>
-          <p>
-            <span class="course-select__highlight">여기를</span>
-            클릭하여 추천 여행 코스를 확인해보세요.
-          </p>
+          <div class="course-select__title-clickable">
+            <h3>추천 여행 코스</h3>
+            <p>
+              <span class="course-select__highlight">여기를</span>
+              클릭하여 추천 여행 코스를 확인해보세요.
+            </p>
+          </div>
+
+          <button type="button" class="course-select__refresh-btn" @click.stop="togglePopup">
+            추천 코스
+          </button>
         </div>
       </div>
     </div>
@@ -178,7 +184,11 @@ const filteredCourses = computed(() => {
     const title = normalizeText(course.title)
     return selected.titles.some((target) => {
       const normalizedTarget = normalizeText(target)
-      return title === normalizedTarget || title.includes(normalizedTarget) || normalizedTarget.includes(title)
+      return (
+        title === normalizedTarget ||
+        title.includes(normalizedTarget) ||
+        normalizedTarget.includes(title)
+      )
     })
   })
 
@@ -219,6 +229,14 @@ const handleSelectCourse = (course) => {
   padding: 1rem 0;
 }
 
+.course-select__card {
+  border: 1px solid #e7e5e4;
+  border-radius: 24px;
+  background: #fafaf9;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  padding: 1.25rem;
+}
+
 .course-select__header {
   display: flex;
   flex-direction: column;
@@ -236,6 +254,8 @@ const handleSelectCourse = (course) => {
   display: inline-block;
   cursor: pointer;
   outline: none;
+  flex: 1;
+  min-width: 0;
 }
 
 .course-select__title-clickable h3 {
@@ -252,6 +272,22 @@ const handleSelectCourse = (course) => {
 .course-select__highlight {
   color: #ef4444;
   font-weight: 700;
+}
+
+.course-select__refresh-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #1c1917;
+  color: white;
+  white-space: nowrap;
+}
+
+.course-select__refresh-btn:hover {
+  background: #111;
 }
 
 .course-select__toggle,
