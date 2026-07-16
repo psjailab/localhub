@@ -76,6 +76,15 @@ L.Icon.Default.mergeOptions({
   shadowUrl
 })
 
+const defaultIcon = L.icon({
+  iconUrl,
+  iconRetinaUrl,
+  shadowUrl,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34]
+})
+
 import PlaceCard from '../components/PlaceCard.vue'
 import PlaceListView from '../components/PlaceListView.vue'
 import Cart from '../components/Cart.vue'
@@ -259,7 +268,7 @@ const renderPlaces = () => {
     const lng = parseFloat(place.mapx)
     if (Number.isNaN(lat) || Number.isNaN(lng)) return
 
-    const marker = L.marker([lat, lng])
+    const marker = L.marker([lat, lng], { icon: defaultIcon })
 
     marker.on('click', () => {
       selectedPlace.value = place
