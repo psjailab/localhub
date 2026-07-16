@@ -17,7 +17,6 @@
           <span>Community</span>
         </router-link>
       </nav>
-
     </header>
 
     <main class="main-shell">
@@ -45,9 +44,26 @@
       <section class="content-surface">
         <router-view />
       </section>
+
+      <footer class="app-footer">
+        본 서비스는 한국관광공사의 국문 관광정보 서비스(TourAPI 4.0) 데이터를 활용하였으며, 공공누리 제3유형(출처 표시, 변경 금지) 조건에 따라 출처를 표기합니다. (원본 출처: 한국관광공사 / 공공데이터포털) 또한, 서비스 내 일부 시각 자료는 생성형 AI를 활용하여 자체 제작되었습니다.
+      </footer>
     </main>
   </div>
 </template>
 
 <script setup>
 </script>
+
+<style scoped>
+.app-footer {
+  margin-top: 2rem;
+  padding: 1rem 1.25rem;
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 16px;
+}
+</style>
