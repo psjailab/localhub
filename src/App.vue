@@ -18,7 +18,6 @@
         </router-link>
       </nav>
 
-      <button class="ghost-action">Plan a stay</button>
     </header>
 
     <main class="main-shell">
@@ -41,8 +40,7 @@
             alt="Scenic travel landscape"
           />
           <div class="floating-card">
-            <p>Featured now</p>
-            <strong>Seoul • after-hours city walks</strong>
+            <strong>Seoul</strong>
           </div>
         </div>
       </section>
